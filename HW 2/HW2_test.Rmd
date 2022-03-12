@@ -1,0 +1,78 @@
+---
+title: "3G0 test"
+author: "matt"
+date: "16/02/2022"
+output: pdf_document
+---
+
+# PHYSICS 3G03 HW 2: Momentum accelerated and normalized gradient descent, Hessians and linear regression
+
+## Matthew Bain (001406931)
+
+We start by importing all the Python libraries we will need for this project. We also define some global parameters.
+
+```{python}
+# fundamentals
+import numpy.linalg as LA           # linalg module of numpy for efficient vector/matrix computations
+import pandas as pd                 # pandas for data manipulation
+
+# libraries for computing gradient descent
+import autograd.numpy as np         # autograd-wrapped numpy for vectorization functionality etc.
+from autograd import grad           # module for computing gradients
+from autograd import value_and_grad # autograd function that returns gradient and value of input function 
+
+## plotting libraries
+import matplotlib.pyplot as plt     # pyplot module of matplotlib for plotting
+
+# from mlrefined_libraries >  math_optimization_library import 'static_plotter' function
+
+path = '/Users/matthewbain/Documents/Math/courses/semester\ II/PHYS\ 3G03/assignments/assignments/HW\ 2/code/imports/'
+from path import static_plotter
+static_plotter = static_plotter.Visualizer()
+
+# global plotting parameters
+plt_clrs = (np.array([94,255,231])/360, np.array([133,94,214])/360, np.array([110,250,152])/360)
+
+```
+
+*note:* the function \`static_plotter\` imported above produces contour plots and comes from the \*Machine Learning Refined\* repository [(Watt, 2020)]([https://github.com/jermwatt/machine_learning_refined).](https://github.com/jermwatt/machine_learning_refined).)
+
+**\#\# Exercise 1** *Momentum accelerated gradient descent*\
+**1.1** In this exercise we implement momentum accelerated gradient descent.
+
+```{python}
+### GD function - inputs: g (cost function), alpha (steplength), max_its (max iterations), w (initial point)
+def momentum_GD(w, g, alpha, beta, max_its):
+
+    # compute gradient module
+    gradient = value_and_grad(g)
+
+    # containers to track GD values; store initial position & cost
+    weight_history = [w]    # weight
+    cost_history = [g(w)]   # corresponding cost
+    dir_history = []        # descent direction
+
+    ## run gradient descent optimization
+    for it in range(max_its):
+      # evaluate cost and gradient for current step
+      cost_eval, grad_eval = gradient(weight_history[-1])
+      
+      # compute descent direction
+        if it == 0:
+          # for initial step
+          dir_eval = (-1)*(grad_eval)
+        else:
+          # for all other steps
+          dir_eval = (beta)*dir_history[-1] + (1-beta)*(-1)*(grad_eval)
+
+        # take momentum-accelerated GD step
+        w = weight_history[-1] + alpha*dir_eval
+
+        # record weight and cost
+        weight_history.append(w)
+        cost_history.append(g(w))
+        dir_history.append(dir_eval)
+    
+    return weight_history, cost_history, dir_history
+
+```
